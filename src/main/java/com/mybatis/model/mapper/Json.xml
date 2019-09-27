@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mybatis.model.dao.JsonDao">
+	<select id="findByName" resultType="JsonTable">
+		SELECT * FROM jsontable WHERE jsons ->> '$.name' = #{name}
+	</select>
+	<select id="findByNames" resultType="JsonTable">
+		SELECT * FROM jsontable WHERE jsons ->> '$.name' in 
+		<foreach collection="names" item="name" open="(" separator="," close=")">#{name}</foreach>
+	</select>
+	<select id="findByTag" resultType="JsonTable">
+		SELECT * FROM jsontable WHERE JSON_CONTAINS(jsons -> '$.tags' , #{tag} )
+	</select>
+	<select id="findAll" resultType="JsonTable">
+		SELECT * FROM jsontable
+	</select>
+</mapper>

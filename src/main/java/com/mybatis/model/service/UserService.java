@@ -1,0 +1,130 @@
+package com.mybatis.model.service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.mybatis.model.UsersBean;
+import com.mybatis.model.dao.UsersDao;
+
+
+@Service
+public class UserService {
+	@Autowired
+	private UsersDao usersDAO;
+	
+	
+	@Transactional(isolation=Isolation.READ_UNCOMMITTED)
+	public Map<String,String> regist(UsersBean bean) {
+		Map<String,String> map = new HashMap<>();
+		
+		// check is this ID exist
+		if(usersDAO.selectByUId(bean.getUserID()) == null) {
+			
+			// check is this Name exist
+			if(usersDAO.selectByName(bean.getUserName()) == null) {
+				// insert this data
+				int result = usersDAO.insert(bean);
+				
+				if(result == 1) {
+					map.put("userId",bean.getUserID());
+					map.put("userName",bean.getUserName());
+				} else {
+					map.put("errorMsg", "internal error , please try again");
+					
+					System.out.println("Rollback");
+				}
+				
+				
+				
+			} else {
+				// run change name's method
+				String newUserName = getNewUserName(bean.getUserName());
+				bean.setUserName(newUserName);
+				
+				// insert this data
+				int result = usersDAO.insert(bean);
+				
+				if(result == 1) {
+					map.put("userId",bean.getUserID());
+					map.put("userName",bean.getUserName());
+				} else {
+					map.put("errorMsg", "internal error , please try again");
+					
+				}
+				
+			}
+			
+		} else {
+			map.put("errorMsg", "ID already registed");
+		}
+		
+		return map;
+	}
+	
+	
+	
+	private String getNewUserName(String userName) {
+		String newUserName = userName;
+		
+		
+		List<String> list = usersDAO.selectLikeName(userName);
+
+		// substring to get following numbers
+		// filter for not a number
+		List<Integer> filteredList = new ArrayList();
+		for(String resultUserName : list) {
+			String processedUserName = resultUserName.substring(userName.length());
+			
+			if(processedUserName.matches("^[0-9]+$")) {
+				filteredList.add(Integer.valueOf(processedUserName));
+			}
+		}
+		
+		
+		// sorting for next operation
+		Integer[] intArr = filteredList.toArray(new Integer[filteredList.size()]);
+		Arrays.sort(intArr);
+		
+		if(filteredList.size() != 0) {
+			
+			// check first
+			if(intArr[0] != 1) {
+				newUserName = newUserName + "1";
+				
+			} else {
+				
+				// get the unused number that is between the numbers
+				int arrLen = intArr.length;
+				for(int i=0 ; i<(arrLen - 1) ; i++) {
+					
+					// if near number's difference greater than one
+					// than insert new number between them
+					if((intArr[i+1] - intArr[i]) > 1) {
+						newUserName = newUserName + String.valueOf(intArr[i] + 1);
+						break;
+						
+					} else if(i == (arrLen - 2)) { // last point case
+						newUserName = newUserName + String.valueOf(intArr[i+1] + 1);
+					}
+				}
+				
+			}
+			
+			
+		} else {
+			newUserName = newUserName + "1";
+		}
+		
+		
+		return newUserName;
+	}
+}

@@ -1,0 +1,16 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /MyBatis
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/userSystem?serverTimezone=UTC
+    username: root
+    password: passw0rd
+    driver-class-name: com.mysql.cj.jdbc.Driver    
+    
+mybatis-plus:
+  mapper-locations: classpath:com/mybatis/model/mapper/*.xml
+  config-location: classpath:mybatis-config.xml
+  
