@@ -18,6 +18,7 @@ import com.mybatis.model.service.UserService;
 
 @RestController
 public class MyBatisController {
+	
 	@Autowired
 	UserService userService;
 	
@@ -29,19 +30,19 @@ public class MyBatisController {
 		JSONObject jsonObj = new JSONObject(body);
 		
 		// data check
-		if(jsonObj.getString("userId") == null || jsonObj.getString("userId").matches("^.*[ ]+.*$")) {
+		if(!jsonObj.has("userId") || jsonObj.getString("userId") == null || jsonObj.getString("userId").matches("^.*[ ]+.*$")) {
 			map.put("errorMsg", "invalid ID input");
 			
 			return map;
 		}
 		
-		if(jsonObj.getString("userName") == null || jsonObj.getString("userName").matches("^.*[ ]+.*$")) {
+		if(!jsonObj.has("userName") || jsonObj.getString("userName") == null || jsonObj.getString("userName").matches("^.*[ ]+.*$")) {
 			map.put("errorMsg", "invalid Name input");
 			
 			return map;
 		}
 		
-		if(jsonObj.getString("pwd") == null || jsonObj.getString("pwd").matches("^.*[ ]+.*$")) {
+		if(!jsonObj.has("pwd") || jsonObj.getString("pwd") == null || jsonObj.getString("pwd").matches("^.*[ ]+.*$")) {
 			map.put("errorMsg", "invalid password input");
 			
 			return map;
